@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import './Profile.css';
+import defaultAvatar from '../assets/default-avatar.svg';
 
 const Profile = () => {
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, updateUser } = useAuth();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -54,9 +55,8 @@ const Profile = () => {
                 config
             );
 
-            const userData = JSON.parse(localStorage.getItem('user'));
-            const updatedUserData = { ...userData, ...data };
-            localStorage.setItem('user', JSON.stringify(updatedUserData));
+            // Update the user state with the updated profile information
+            updateUser(data);
 
             setMessage('Profile updated successfully');
             setPassword('');
@@ -86,14 +86,33 @@ const Profile = () => {
                     config
                 );
 
-                const userData = JSON.parse(localStorage.getItem('user'));
-                const updatedUserData = { ...userData, profilePicture: data.profilePicture };
-                localStorage.setItem('user', JSON.stringify(updatedUserData));
+                // Update the user state with the new profile picture
+                updateUser({ profilePicture: data.profilePicture });
 
                 setMessage('Profile picture updated successfully');
             } catch (error) {
                 setMessage(error.response?.data?.message || 'Error uploading picture');
             }
+        }
+    };
+
+    const handleDeletePicture = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            };
+
+            await axios.delete('http://localhost:5000/api/profile/picture', config);
+
+            // Update the user state with the removed profile picture
+            updateUser({ profilePicture: null });
+
+            setMessage('Profile picture removed successfully');
+        } catch (error) {
+            setMessage(error.response?.data?.message || 'Error removing picture');
         }
     };
 
@@ -111,17 +130,30 @@ const Profile = () => {
                     <img 
                         src={user?.profilePicture 
                             ? `http://localhost:5000${user.profilePicture}` 
-                            : 'https://via.placeholder.com/150'
+                            : defaultAvatar
                         } 
                         alt="Profile" 
+                        onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = defaultAvatar;
+                        }}
                     />
                 </div>
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePictureUpload}
-                    className="file-input"
-                />
+                <div className="profile-picture-actions">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePictureUpload}
+                        className="file-input"
+                    />
+                    <button 
+                        type="button" 
+                        onClick={handleDeletePicture}
+                        className="delete-btn"
+                    >
+                        Delete Picture
+                    </button>
+                </div>
             </div>
 
             <form onSubmit={handleProfileUpdate} className="profile-form">

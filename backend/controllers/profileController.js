@@ -54,6 +54,25 @@ export const updateProfile = asyncHandler(async (req, res) => {
 // @desc    Upload profile picture
 // @route   POST /api/profile/upload
 // @access  Private
+// @desc    Delete profile picture
+// @route   DELETE /api/profile/picture
+// @access  Private
+export const deleteProfilePicture = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    
+    if (user) {
+        user.profilePicture = null;
+        const updatedUser = await user.save();
+        res.json({
+            _id: updatedUser._id,
+            profilePicture: updatedUser.profilePicture
+        });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
 export const uploadProfilePicture = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id);
     

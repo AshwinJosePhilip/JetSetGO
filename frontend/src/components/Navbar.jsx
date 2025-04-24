@@ -3,6 +3,7 @@ import { AppBar, Toolbar, Typography, Button, Box, Modal, TextField, Alert, Avat
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
+import defaultAvatar from '../assets/default-avatar.svg';
 
 const modalStyle = {
   position: 'absolute',
@@ -139,12 +140,13 @@ const Navbar = () => {
                 sx={{ ml: 2 }}
               >
                 <Avatar 
-                  src={user?.profilePicture ? `http://localhost:5000${user.profilePicture}` : null}
+                  src={user?.profilePicture ? `http://localhost:5000${user.profilePicture}` : defaultAvatar}
                   sx={{ 
                     bgcolor: '#FF8000',
                     color: '#000000',
                     width: 40,
-                    height: 40
+                    height: 40,
+                    border: '2px solid #FF8000'
                   }}
                 >
                   {user?.name ? user.name[0].toUpperCase() : 'U'}

@@ -78,12 +78,21 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Function to update user data (for profile updates)
+  const updateUser = (userData) => {
+    const updatedUser = { ...user, ...userData };
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  };
+
   const value = {
     user,
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated: !!user,
+    isAdmin: user?.isAdmin || false,
     loading,
   };
 

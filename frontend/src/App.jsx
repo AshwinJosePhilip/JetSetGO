@@ -6,10 +6,11 @@ import Header from './components/Header';
 import FlightSearchForm from './components/FlightSearchForm';
 import AboutUs from './components/AboutUs';
 import Footer from './components/Footer';
+import Profile from './components/Profile';
+import AboutUsAdmin from './components/admin/AboutUsAdmin';
 
 function App() {
   const { isAuthenticated } = useAuth();
-
   return (
     <Box
       sx={{
@@ -34,6 +35,14 @@ function App() {
         <Route path="/search" element={
           isAuthenticated ? <FlightSearchForm /> : <Navigate to="/" />
         } />
+        <Route 
+          path="/profile" 
+          element={isAuthenticated ? <Profile /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/admin/about"
+          element={isAuthenticated ? <AboutUsAdmin /> : <Navigate to="/" />}
+        />
       </Routes>
       <Footer />
     </Box>
