@@ -12,10 +12,16 @@ export const searchFlights = async (req, res) => {
             passengers
         } = req.query;
 
+        console.log('Received search params:', req.query);
+
         // Create date range for departure (entire day)
         const startDate = new Date(departureDate);
+        startDate.setHours(0, 0, 0, 0);
+        
         const endDate = new Date(departureDate);
-        endDate.setHours(23, 59, 59);
+        endDate.setHours(23, 59, 59, 999);
+
+        console.log('Searching between:', startDate, 'and', endDate);
 
         // Base query
         const query = {
@@ -27,13 +33,28 @@ export const searchFlights = async (req, res) => {
             }
         };
 
-        // Add seats availability check
-        const cabinClassLower = cabinClass.toLowerCase().replace(' ', '');
-        query[`seatsAvailable.${cabinClassLower}`] = { $gte: parseInt(passengers) };
+        // Map the frontend cabin class names to the database format
+        const cabinClassMap = {
+            'Economy': 'economy',
+            'Premium Economy': 'premiumEconomy',
+            'Business': 'business',
+            'First Class': 'firstClass'
+        };
+
+        // Get the correct cabin class key
+        const dbCabinClass = cabinClassMap[cabinClass] || cabinClass.toLowerCase().replace(/\s+/g, '');
+        
+        // Add seats availability check based on cabin class
+        query[`seatsAvailable.${dbCabinClass}`] = { $gte: parseInt(passengers) };
+
+        console.log('Final query:', JSON.stringify(query, null, 2));
 
         const flights = await Flight.find(query);
+        console.log('Found flights:', flights.length);
+        
         res.json(flights);
     } catch (error) {
+        console.error('Flight search error:', error);
         res.status(500).json({ message: error.message });
     }
 };

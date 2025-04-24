@@ -2,10 +2,19 @@ import User from '../models/userModel.js';
 import asyncHandler from 'express-async-handler';
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
+
+// Ensure upload directory exists
+const uploadDir = 'uploads/profiles';
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
-    destination: 'uploads/profiles/',
+    destination: (req, file, cb) => {
+        cb(null, uploadDir);
+    },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`);
     }
@@ -20,7 +29,7 @@ export const upload = multer({
         if (extname && mimetype) {
             return cb(null, true);
         }
-        cb(new Error('Images only!'));
+        cb(new Error('Only JPEG, JPG and PNG images are allowed'));
     }
 });
 
@@ -54,25 +63,6 @@ export const updateProfile = asyncHandler(async (req, res) => {
 // @desc    Upload profile picture
 // @route   POST /api/profile/upload
 // @access  Private
-// @desc    Delete profile picture
-// @route   DELETE /api/profile/picture
-// @access  Private
-export const deleteProfilePicture = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id);
-    
-    if (user) {
-        user.profilePicture = null;
-        const updatedUser = await user.save();
-        res.json({
-            _id: updatedUser._id,
-            profilePicture: updatedUser.profilePicture
-        });
-    } else {
-        res.status(404);
-        throw new Error('User not found');
-    }
-});
-
 export const uploadProfilePicture = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id);
     
@@ -88,6 +78,25 @@ export const uploadProfilePicture = asyncHandler(async (req, res) => {
             res.status(400);
             throw new Error('No file uploaded');
         }
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
+// @desc    Delete profile picture
+// @route   DELETE /api/profile/picture
+// @access  Private
+export const deleteProfilePicture = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    
+    if (user) {
+        user.profilePicture = null;
+        const updatedUser = await user.save();
+        res.json({
+            _id: updatedUser._id,
+            profilePicture: updatedUser.profilePicture
+        });
     } else {
         res.status(404);
         throw new Error('User not found');

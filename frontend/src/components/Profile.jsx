@@ -67,32 +67,50 @@ const Profile = () => {
 
     const handlePictureUpload = async (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const formData = new FormData();
-            formData.append('profilePicture', file);
+        if (!file) {
+            setMessage('Please select a file');
+            return;
+        }
 
-            try {
-                const token = localStorage.getItem('token');
-                const config = {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        Authorization: `Bearer ${token}`
-                    }
-                };
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (!validTypes.includes(file.type)) {
+            setMessage('Only JPEG, JPG and PNG images are allowed');
+            return;
+        }
 
-                const { data } = await axios.post(
-                    'http://localhost:5000/api/profile/upload',
-                    formData,
-                    config
-                );
+        const formData = new FormData();
+        formData.append('profilePicture', file);
 
-                // Update the user state with the new profile picture
-                updateUser({ profilePicture: data.profilePicture });
-
-                setMessage('Profile picture updated successfully');
-            } catch (error) {
-                setMessage(error.response?.data?.message || 'Error uploading picture');
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setMessage('Authentication required. Please log in again.');
+                return;
             }
+
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`
+                }
+            };
+
+            const { data } = await axios.post(
+                'http://localhost:5000/api/profile/upload',
+                formData,
+                config
+            );
+
+            // Update the user state with the new profile picture
+            updateUser({ profilePicture: data.profilePicture });
+            setMessage('Profile picture updated successfully');
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 
+                               error.message || 
+                               'Error uploading picture';
+            setMessage(errorMessage);
+            console.error('Upload error:', error);
         }
     };
 

@@ -5,7 +5,6 @@ import axios from 'axios';
 const AboutUs = () => {
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -15,19 +14,10 @@ const AboutUs = () => {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/about');
-        if (response.data) {
-          setContent(response.data);
-        } else {
-          // Fallback content if no content is found
-          setContent({
-            title: 'About JetSetGo',
-            content: 'JetSetGo is your ultimate flight booking companion. We make travel planning seamless and enjoyable, offering the best deals on flights worldwide.'
-          });
-        }
+        const response = await axios.get('/api/about');
+        setContent(response.data);
         setLoading(false);
       } catch (err) {
-        setError('Failed to load content. Please try again later.');
         setSnackbar({
           open: true,
           message: 'Failed to load content. Please try again later.',
@@ -55,44 +45,6 @@ const AboutUs = () => {
     );
   }
 
-  // If content is null, provide default content
-  if (!content) {
-    return (
-      <Box
-        sx={{
-          bgcolor: '#000000',
-          py: 8
-        }}
-      >
-        <Container maxWidth="md">
-          <Typography
-            component="h2"
-            variant="h3"
-            sx={{
-              color: '#FF8000',
-              fontWeight: 'bold',
-              mb: 4,
-              textAlign: 'center'
-            }}
-          >
-            About JetSetGo
-          </Typography>
-          
-          <Typography 
-            variant="body1" 
-            sx={{ 
-              color: 'white',
-              textAlign: 'center',
-              whiteSpace: 'pre-line'
-            }}
-          >
-            JetSetGo is your ultimate flight booking companion. We make travel planning seamless and enjoyable, offering the best deals on flights worldwide.
-          </Typography>
-        </Container>
-      </Box>
-    );
-  }
-
   return (
     <Box
       sx={{
@@ -111,7 +63,7 @@ const AboutUs = () => {
             textAlign: 'center'
           }}
         >
-          {content.title}
+          {content?.title || 'About JetSetGo'}
         </Typography>
         
         <Box
@@ -121,48 +73,34 @@ const AboutUs = () => {
             alignItems: 'center',
             gap: 4
           }}
-         >
-          {content.image ? (
+        >
+          {content?.image ? (
             <Box
               component="img"
               sx={{
                 width: { xs: '100%', md: '50%' },
                 maxWidth: '500px',
                 height: 'auto',
-                borderRadius: 2
+                borderRadius: 2,
+                border: '2px solid #FF8000'
               }}
               src={content.image}
-              alt="About JetSetGo"
+              alt={content.title}
             />
-          ) : (
-            <Box
-              sx={{
-                width: { xs: '100%', md: '50%' },
-                maxWidth: '500px',
-                height: '300px',
-                borderRadius: 2,
-                bgcolor: '#333',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <Typography variant="body1" sx={{ color: '#FF8000' }}>
-                No image available
-              </Typography>
-            </Box>
-          )}
+          ) : null}
           
           <Typography 
             variant="body1" 
             sx={{ 
               color: 'white',
               flex: 1,
-              textAlign: { xs: 'center', md: 'left' },
-              whiteSpace: 'pre-line'
+              textAlign: { xs: 'center', md: content?.image ? 'left' : 'center' },
+              whiteSpace: 'pre-line',
+              fontSize: '1.1rem',
+              lineHeight: 1.8
             }}
           >
-            {content.content}
+            {content?.content || 'Content loading...'}
           </Typography>
         </Box>
 

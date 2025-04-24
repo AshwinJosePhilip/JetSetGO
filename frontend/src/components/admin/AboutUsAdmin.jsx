@@ -24,15 +24,18 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const AboutUsAdmin = () => {
   const { isAuthenticated, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [contents, setContents] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [editingContent, setEditingContent] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
-    content: ''
+    content: '',
+    image: ''
   });
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -41,14 +44,19 @@ const AboutUsAdmin = () => {
   });
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchContents();
+    if (!isAuthenticated || !isAdmin) {
+      navigate('/');
+      return;
     }
-  }, [isAuthenticated]);
+    fetchContents();
+  }, [isAuthenticated, isAdmin, navigate]);
 
   const fetchContents = async () => {
     try {
-      const { data } = await axios.get('/api/about/all');
+      const token = localStorage.getItem('token');
+      const { data } = await axios.get('/api/about/all', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setContents(data);
     } catch (error) {
       showSnackbar('Failed to fetch content', 'error');
@@ -62,11 +70,26 @@ const AboutUsAdmin = () => {
     });
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({
+          ...formData,
+          image: reader.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleEdit = (content) => {
     setEditingContent(content);
     setFormData({
       title: content.title,
-      content: content.content
+      content: content.content,
+      image: content.image || ''
     });
     setOpenDialog(true);
   };
@@ -74,7 +97,10 @@ const AboutUsAdmin = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this content?')) {
       try {
-        await axios.delete(`/api/about/${id}`);
+        const token = localStorage.getItem('token');
+        await axios.delete(`/api/about/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         showSnackbar('Content deleted successfully', 'success');
         fetchContents();
       } catch (error) {
@@ -83,22 +109,57 @@ const AboutUsAdmin = () => {
     }
   };
 
+  const handleSetActive = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showSnackbar('Authorization token not found', 'error');
+        return;
+      }
+      
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+
+      const response = await axios.put(`/api/about/${id}/set-active`, null, config);
+      
+      if (response.data) {
+        showSnackbar('Content set as active successfully', 'success');
+        await fetchContents();
+      }
+    } catch (error) {
+      console.error('Error setting content as active:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to set content as active';
+      showSnackbar(errorMessage, 'error');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      };
+
       if (editingContent) {
-        await axios.put(`/api/about/${editingContent._id}`, formData);
+        await axios.put(`/api/about/${editingContent._id}`, formData, config);
         showSnackbar('Content updated successfully', 'success');
       } else {
-        await axios.post('/api/about', formData);
+        await axios.post('/api/about', formData, config);
         showSnackbar('Content created successfully', 'success');
       }
       setOpenDialog(false);
       setEditingContent(null);
-      setFormData({ title: '', content: '' });
+      setFormData({ title: '', content: '', image: '' });
       fetchContents();
     } catch (error) {
-      showSnackbar('Failed to save content', 'error');
+      showSnackbar(error.response?.data?.message || 'Failed to save content', 'error');
     }
   };
 
@@ -118,13 +179,7 @@ const AboutUsAdmin = () => {
   };
 
   if (!isAuthenticated || !isAdmin) {
-    return (
-      <Container>
-        <Typography sx={{ color: '#FF8000', mt: 4, textAlign: 'center' }}>
-          Please log in as an admin to manage content.
-        </Typography>
-      </Container>
-    );
+    return null;
   }
 
   return (
@@ -141,7 +196,7 @@ const AboutUsAdmin = () => {
           }}
           onClick={() => {
             setEditingContent(null);
-            setFormData({ title: '', content: '' });
+            setFormData({ title: '', content: '', image: '' });
             setOpenDialog(true);
           }}
         >
@@ -156,6 +211,7 @@ const AboutUsAdmin = () => {
               <TableCell sx={{ color: '#FF8000' }}>Title</TableCell>
               <TableCell sx={{ color: '#FF8000' }}>Content</TableCell>
               <TableCell sx={{ color: '#FF8000' }}>Created At</TableCell>
+              <TableCell sx={{ color: '#FF8000' }}>Status</TableCell>
               <TableCell sx={{ color: '#FF8000' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -164,10 +220,17 @@ const AboutUsAdmin = () => {
               <TableRow key={content._id}>
                 <TableCell sx={{ color: 'white' }}>{content.title}</TableCell>
                 <TableCell sx={{ color: 'white' }}>
-                  {content.content.substring(0, 100)}...
+                  {content.content ? content.content.substring(0, 100) + '...' : ''}
                 </TableCell>
                 <TableCell sx={{ color: 'white' }}>
                   {new Date(content.createdAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell sx={{ color: 'white' }}>
+                  {content.isActive ? (
+                    <Typography sx={{ color: '#4CAF50' }}>Active</Typography>
+                  ) : (
+                    <Typography sx={{ color: '#9e9e9e' }}>Inactive</Typography>
+                  )}
                 </TableCell>
                 <TableCell>
                   <IconButton onClick={() => handleEdit(content)} sx={{ color: '#FF8000' }}>
@@ -176,6 +239,24 @@ const AboutUsAdmin = () => {
                   <IconButton onClick={() => handleDelete(content._id)} sx={{ color: '#FF8000' }}>
                     <DeleteIcon />
                   </IconButton>
+                  {!content.isActive && (
+                    <Button
+                      onClick={() => handleSetActive(content._id)}
+                      sx={{
+                        ml: 1,
+                        color: '#4CAF50',
+                        borderColor: '#4CAF50',
+                        '&:hover': {
+                          borderColor: '#45a049',
+                          backgroundColor: 'rgba(76, 175, 80, 0.1)'
+                        }
+                      }}
+                      variant="outlined"
+                      size="small"
+                    >
+                      Set Active
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -206,9 +287,25 @@ const AboutUsAdmin = () => {
             onChange={handleInputChange}
             multiline
             rows={4}
+            sx={{ mb: 2 }}
             InputLabelProps={{ sx: { color: '#FF8000' } }}
             InputProps={{ sx: { color: 'white' } }}
           />
+          <input
+            accept="image/*"
+            type="file"
+            onChange={handleImageChange}
+            style={{ color: 'white', marginTop: '1rem' }}
+          />
+          {formData.image && (
+            <Box sx={{ mt: 2 }}>
+              <img 
+                src={formData.image} 
+                alt="Preview" 
+                style={{ maxWidth: '100%', maxHeight: '200px' }} 
+              />
+            </Box>
+          )}
         </DialogContent>
         <DialogActions sx={{ bgcolor: '#000000', p: 2 }}>
           <Button onClick={() => setOpenDialog(false)} sx={{ color: '#FF8000' }}>

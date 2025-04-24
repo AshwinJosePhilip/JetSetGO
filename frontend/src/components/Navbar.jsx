@@ -170,6 +170,12 @@ const Navbar = () => {
                 }}
               >
                 <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
+                {user?.isAdmin && (
+                  <MenuItem onClick={() => {
+                    handleProfileMenuClose();
+                    navigate('/admin/about');
+                  }}>Admin Dashboard</MenuItem>
+                )}
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </>

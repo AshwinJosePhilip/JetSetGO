@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
+import FlightResults from './FlightResults';
 import './FlightSearchForm.css';
 
 const FlightSearchForm = () => {
@@ -13,7 +15,7 @@ const FlightSearchForm = () => {
   const [children, setChildren] = useState(0);
   const [fromAirport, setFromAirport] = useState('');
   const [toAirport, setToAirport] = useState('');
-  const [departureDate, setDepartureDate] = useState('');
+  const [departureDate, setDepartureDate] = useState('2025-04-24');
   const [returnDate, setReturnDate] = useState('');
   const [tripType, setTripType] = useState('roundTrip');
 
@@ -57,22 +59,40 @@ const FlightSearchForm = () => {
     'Dallas/Fort Worth International Airport (DFW)',
   ];
 
-  const handleSubmit = (e) => {
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Form submission logic
-    console.log({
-      fromAirport,
-      toAirport,
-      departureDate,
-      returnDate,
-      cabinClass,
-      adults,
-      children,
-      tripType,
-    });
-    
-    // Here you would normally send data to backend or context
-    alert('Search submitted! Check console for details.');
+    setSearching(true);
+    setSearchError(null);
+
+    try {
+      // Format the departure date to match server's expected format
+      const formattedDepartureDate = new Date(departureDate);
+      formattedDepartureDate.setHours(0, 0, 0, 0);
+      
+      const searchParams = {
+        departureAirport: fromAirport,
+        arrivalAirport: toAirport,
+        departureDate: formattedDepartureDate.toISOString(),
+        returnDate: tripType === 'roundTrip' && returnDate ? new Date(returnDate).toISOString() : undefined,
+        cabinClass,
+        passengers: adults + children
+      };
+
+      console.log('Search params:', searchParams);
+
+      const { data } = await axios.get('/api/flights/search', { params: searchParams });
+      console.log('Search results:', data);
+      setSearchResults(data);
+    } catch (error) {
+      console.error('Search error:', error.response?.data || error);
+      setSearchError(error.response?.data?.message || 'Error searching flights');
+    } finally {
+      setSearching(false);
+    }
   };
 
   // Get today's date in YYYY-MM-DD format for min date validation
@@ -269,6 +289,29 @@ const FlightSearchForm = () => {
           {/* Submit Button */}
           <button type="submit" className="search-btn">Search Flights</button>
         </form>
+
+        {searching && (
+          <div className="searching-message">
+            Searching for available flights...
+          </div>
+        )}
+
+        {searchError && (
+          <div className="error-message">
+            {searchError}
+          </div>
+        )}
+
+        {!searching && !searchError && searchResults.length > 0 && (
+          <FlightResults 
+            flights={searchResults} 
+            searchParams={{
+              adults,
+              children,
+              cabinClass
+            }}
+          />
+        )}
       </div>
     </div>
   );

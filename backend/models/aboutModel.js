@@ -3,20 +3,21 @@ import mongoose from 'mongoose';
 const aboutSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true,
+        required: [true, 'Title is required'],
         trim: true
     },
     content: {
         type: String,
-        required: true
-    },
-    description: {
-        type: String,
-        required: false
+        required: [true, 'Content is required'],
+        trim: true
     },
     image: {
         type: String,
         required: false
+    },
+    isActive: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
