@@ -1,5 +1,14 @@
 .popular-destinations {
-    padding: 2rem;
+    padding: 4rem 2rem;
+    background-color: #000000;
+    color: #FF8000;
+}
+
+.popular-destinations h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #FF8000;
 }
 
 .destinations-grid {
@@ -7,24 +16,30 @@
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
     margin-top: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .destination-card {
-    background: white;
+    background: #1a1a1a;
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(255, 128, 0, 0.1);
     overflow: hidden;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #FF8000;
 }
 
 .destination-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(255, 128, 0, 0.2);
 }
 
 .destination-card img {
     width: 100%;
-    height: 200px;
+    height: 250px;
     object-fit: cover;
+    border-bottom: 1px solid #FF8000;
 }
 
 .destination-info {
@@ -33,24 +48,45 @@
 
 .destination-info h3 {
     margin: 0 0 0.5rem 0;
-    color: #333;
+    color: #FF8000;
+    font-size: 1.5rem;
 }
 
 .location {
-    color: #666;
-    font-size: 0.9rem;
+    color: #FFA64D;
+    font-size: 1rem;
     margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
 }
 
 .description {
-    color: #444;
-    margin-bottom: 1rem;
-    line-height: 1.5;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    font-size: 0.95rem;
 }
 
 .price {
-    color: #2563eb;
+    color: #FF8000;
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+    .popular-destinations {
+        padding: 2rem 1rem;
+    }
+
+    .destinations-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .destination-card img {
+        height: 200px;
+    }
 }

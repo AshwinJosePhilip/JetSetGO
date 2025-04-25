@@ -6,8 +6,8 @@ const destinationSchema = new mongoose.Schema({
         required: true
     },
     image: {
-        data: Buffer,
-        contentType: String
+        type: String,        // Will store base64 string
+        required: false      // Making it optional
     },
     description: {
         type: String,
@@ -24,6 +24,12 @@ const destinationSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
+
+// Add a validation for base64 image format
+destinationSchema.path('image').validate(function(value) {
+    if (!value) return true; // Allow empty values
+    return value.startsWith('data:image');
+}, 'Image must be in base64 format starting with "data:image"');
 
 const Destination = mongoose.model('Destination', destinationSchema);
 export default Destination;

@@ -147,11 +147,14 @@ const Profile = () => {
                 <div className="profile-picture">
                     <img 
                         src={user?.profilePicture 
-                            ? `http://localhost:5000${user.profilePicture}` 
+                            ? `${process.env.NODE_ENV === 'production' 
+                                ? '' 
+                                : 'http://localhost:5000'}${user.profilePicture}` 
                             : defaultAvatar
                         } 
                         alt="Profile" 
                         onError={(e) => {
+                            console.log('Image load error:', e);
                             e.target.onerror = null;
                             e.target.src = defaultAvatar;
                         }}

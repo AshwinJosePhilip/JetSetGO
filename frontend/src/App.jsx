@@ -8,9 +8,12 @@ import AboutUs from './components/AboutUs';
 import Footer from './components/Footer';
 import Profile from './components/Profile';
 import AboutUsAdmin from './components/admin/AboutUsAdmin';
+import DestinationAdmin from './components/admin/DestinationAdmin';
+import PopularDestinations from './components/PopularDestinations';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   return (
     <Box
       sx={{
@@ -27,6 +30,9 @@ function App() {
           <Box sx={{ flex: 1 }}>
             <Header />
             <FlightSearchForm />
+            <ErrorBoundary>
+              <PopularDestinations />
+            </ErrorBoundary>
             <Box sx={{ mt: 4 }}>
               <AboutUs />
             </Box>
@@ -41,7 +47,11 @@ function App() {
         />
         <Route
           path="/admin/about"
-          element={isAuthenticated ? <AboutUsAdmin /> : <Navigate to="/" />}
+          element={isAuthenticated && isAdmin ? <AboutUsAdmin /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/admin/destinations"
+          element={isAuthenticated && isAdmin ? <DestinationAdmin /> : <Navigate to="/" />}
         />
       </Routes>
       <Footer />

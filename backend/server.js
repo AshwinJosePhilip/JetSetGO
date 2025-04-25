@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import destinationRoutes from './routes/destinationRoutes.js';
@@ -33,7 +34,13 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Serve uploaded files - ensure absolute path
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+const profilesDir = path.join(uploadsDir, 'profiles');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+if (!fs.existsSync(profilesDir)) fs.mkdirSync(profilesDir);
+
+// Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes

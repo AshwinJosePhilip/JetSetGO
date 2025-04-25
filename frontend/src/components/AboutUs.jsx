@@ -84,8 +84,12 @@ const AboutUs = () => {
                 borderRadius: 2,
                 border: '2px solid #FF8000'
               }}
-              src={content.image}
+              src={content.image || 'https://placehold.co/600x400/000000/FF8000?text=About+Us'}
               alt={content.title}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://placehold.co/600x400/000000/FF8000?text=About+Us';
+              }}
             />
           ) : null}
           

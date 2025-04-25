@@ -140,13 +140,22 @@ const Navbar = () => {
                 sx={{ ml: 2 }}
               >
                 <Avatar 
-                  src={user?.profilePicture ? `http://localhost:5000${user.profilePicture}` : defaultAvatar}
+                  src={user?.profilePicture 
+                    ? `${process.env.NODE_ENV === 'production' 
+                        ? '' 
+                        : 'http://localhost:5000'}${user.profilePicture}` 
+                    : defaultAvatar}
                   sx={{ 
                     bgcolor: '#FF8000',
                     color: '#000000',
                     width: 40,
                     height: 40,
                     border: '2px solid #FF8000'
+                  }}
+                  onError={(e) => {
+                    console.log('Image load error:', e);
+                    e.target.onerror = null;
+                    e.target.src = defaultAvatar;
                   }}
                 >
                   {user?.name ? user.name[0].toUpperCase() : 'U'}
@@ -170,12 +179,16 @@ const Navbar = () => {
                 }}
               >
                 <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
-                {user?.isAdmin && (
-                  <MenuItem onClick={() => {
+                {user?.isAdmin && [
+                  <MenuItem key="about" onClick={() => {
                     handleProfileMenuClose();
                     navigate('/admin/about');
-                  }}>Admin Dashboard</MenuItem>
-                )}
+                  }}>Manage About Us</MenuItem>,
+                  <MenuItem key="destinations" onClick={() => {
+                    handleProfileMenuClose();
+                    navigate('/admin/destinations');
+                  }}>Manage Destinations</MenuItem>
+                ]}
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </>
