@@ -30,7 +30,7 @@ const bookingSchema = new mongoose.Schema({
     cabinClass: {
         type: String,
         required: true,
-        enum: ['economy', 'premiumEconomy', 'business', 'firstClass']
+        enum: ['economy', 'business', 'firstClass']
     },
     totalPrice: {
         type: Number,

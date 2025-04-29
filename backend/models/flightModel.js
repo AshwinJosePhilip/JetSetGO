@@ -31,10 +31,6 @@ const flightSchema = new mongoose.Schema({
             type: Number,
             required: true
         },
-        premiumEconomy: {
-            type: Number,
-            required: true
-        },
         business: {
             type: Number,
             required: true
@@ -47,27 +43,17 @@ const flightSchema = new mongoose.Schema({
     seatsAvailable: {
         economy: {
             type: Number,
-            required: true,
-            default: 150
-        },
-        premiumEconomy: {
-            type: Number,
-            required: true,
-            default: 50
+            required: true
         },
         business: {
             type: Number,
-            required: true,
-            default: 30
+            required: true
         },
         firstClass: {
             type: Number,
-            required: true,
-            default: 10
+            required: true
         }
     }
-}, {
-    timestamps: true
 });
 
 const Flight = mongoose.model('Flight', flightSchema);

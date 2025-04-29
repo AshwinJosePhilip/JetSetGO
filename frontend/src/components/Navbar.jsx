@@ -187,7 +187,11 @@ const Navbar = () => {
                   <MenuItem key="destinations" onClick={() => {
                     handleProfileMenuClose();
                     navigate('/admin/destinations');
-                  }}>Manage Destinations</MenuItem>
+                  }}>Manage Destinations</MenuItem>,
+                  <MenuItem key="flights" onClick={() => {
+                    handleProfileMenuClose();
+                    navigate('/admin/flights');
+                  }}>Manage Flights</MenuItem>
                 ]}
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>

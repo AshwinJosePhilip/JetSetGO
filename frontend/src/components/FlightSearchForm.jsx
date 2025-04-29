@@ -53,10 +53,7 @@ const FlightSearchForm = () => {
     'Los Angeles International Airport (LAX)',
     'San Francisco International Airport (SFO)',
     'Chicago O\'Hare International Airport (ORD)',
-    'Denver International Airport (DEN)',
-    'Seattle-Tacoma International Airport (SEA)',
-    'Miami International Airport (MIA)',
-    'Dallas/Fort Worth International Airport (DFW)',
+    'Miami International Airport (MIA)'
   ];
 
   const [searchResults, setSearchResults] = useState([]);
@@ -67,26 +64,38 @@ const FlightSearchForm = () => {
     e.preventDefault();
     setSearching(true);
     setSearchError(null);
+    setSearchResults([]); // Clear previous results
 
     try {
-      // Format the departure date to match server's expected format
-      const formattedDepartureDate = new Date(departureDate);
-      formattedDepartureDate.setHours(0, 0, 0, 0);
-      
+      // Extract airport codes if needed
+      const formatAirport = (airport) => {
+        // If it's already in the format we want, return as is
+        if (airport.includes('(') && airport.includes(')')) {
+          return airport;
+        }
+        // If it's just a code, format it
+        return `${airport} (${airport})`;
+      };
+
       const searchParams = {
-        departureAirport: fromAirport,
-        arrivalAirport: toAirport,
-        departureDate: formattedDepartureDate.toISOString(),
-        returnDate: tripType === 'roundTrip' && returnDate ? new Date(returnDate).toISOString() : undefined,
+        departureAirport: formatAirport(fromAirport),
+        arrivalAirport: formatAirport(toAirport),
+        departureDate: departureDate,
+        returnDate: tripType === 'roundTrip' ? returnDate : undefined,
         cabinClass,
         passengers: adults + children
       };
 
-      console.log('Search params:', searchParams);
+      console.log('Submitting search with params:', searchParams);
 
       const { data } = await axios.get('/api/flights/search', { params: searchParams });
       console.log('Search results:', data);
-      setSearchResults(data);
+      
+      if (data.length === 0) {
+        setSearchError('No flights found matching your criteria. Please try different dates or airports.');
+      } else {
+        setSearchResults(data);
+      }
     } catch (error) {
       console.error('Search error:', error.response?.data || error);
       setSearchError(error.response?.data?.message || 'Error searching flights');
@@ -235,7 +244,6 @@ const FlightSearchForm = () => {
                     onChange={(e) => setCabinClass(e.target.value)}
                   >
                     <option value="Economy">Economy</option>
-                    <option value="Premium Economy">Premium Economy</option>
                     <option value="Business">Business</option>
                     <option value="First Class">First Class</option>
                   </select>

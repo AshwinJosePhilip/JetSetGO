@@ -22,13 +22,8 @@ connectDB();
 
 const app = express();
 
-// CORS configuration
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174'], // Allow both ports
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// Enhanced CORS configuration
+app.use(cors());
 
 // Increase payload size limit for base64 images
 app.use(express.json({ limit: '50mb' }));
@@ -53,10 +48,31 @@ app.use('/api/bookings', bookingRoutes);
 
 const PORT = process.env.PORT || 5000;
 
+// Basic route for testing
 app.get("/", (req, res) => {
   res.send("JetSetGO Backend Running!");
 });
 
-app.listen(PORT, () => {
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
+// Start server with error handling
+const server = app.listen(PORT, (err) => {
+  if (err) {
+    console.error("Error starting server:", err);
+    process.exit(1);
+  }
   console.log(`Server running on port ${PORT}`);
+});
+
+// Handle server errors
+server.on('error', (err) => {
+  console.error("Server error:", err);
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use`);
+    process.exit(1);
+  }
 });

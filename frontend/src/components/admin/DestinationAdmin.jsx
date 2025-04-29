@@ -84,10 +84,16 @@ const DestinationAdmin = () => {
 
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData({
-          ...formData,
-          image: reader.result
-        });
+        const base64String = reader.result;
+        // Make sure we're using a valid base64 image string
+        if (base64String.startsWith('data:image')) {
+          setFormData({
+            ...formData,
+            image: base64String
+          });
+        } else {
+          showSnackbar('Invalid image format', 'error');
+        }
       };
       reader.onerror = () => {
         showSnackbar('Error reading file', 'error');

@@ -11,6 +11,7 @@ import AboutUsAdmin from './components/admin/AboutUsAdmin';
 import DestinationAdmin from './components/admin/DestinationAdmin';
 import PopularDestinations from './components/PopularDestinations';
 import ErrorBoundary from './components/ErrorBoundary';
+import FlightAdmin from './components/admin/FlightAdmin';
 
 function App() {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -52,6 +53,10 @@ function App() {
         <Route
           path="/admin/destinations"
           element={isAuthenticated && isAdmin ? <DestinationAdmin /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/admin/flights"
+          element={isAuthenticated && isAdmin ? <FlightAdmin /> : <Navigate to="/" />}
         />
       </Routes>
       <Footer />

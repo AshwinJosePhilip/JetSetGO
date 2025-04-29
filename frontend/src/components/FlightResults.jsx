@@ -135,9 +135,6 @@ const FlightResults = ({ flights, searchParams }) => {
                         Economy: ${flight.price.economy}
                       </Typography>
                       <Typography sx={{ color: 'white' }}>
-                        Premium Economy: ${flight.price.premiumEconomy}
-                      </Typography>
-                      <Typography sx={{ color: 'white' }}>
                         Business: ${flight.price.business}
                       </Typography>
                       <Typography sx={{ color: 'white' }}>

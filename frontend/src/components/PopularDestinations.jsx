@@ -29,14 +29,11 @@ const PopularDestinations = () => {
         if (!imageData) {
             return 'https://placehold.co/600x400/000000/FF8000?text=No+Image';
         }
-
-        // If it's a base64 image
-        if (imageData.startsWith('data:')) {
+        // Handle base64 images and file paths
+        if (imageData.startsWith('data:image')) {
             return imageData;
         }
-
-        // If it's a URL path
-        return `${process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000'}${imageData}`;
+        return imageData;
     };
 
     if (loading) {
