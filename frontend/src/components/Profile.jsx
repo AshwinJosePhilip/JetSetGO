@@ -12,6 +12,11 @@ const Profile = () => {
     const [message, setMessage] = useState('');
     const [bookings, setBookings] = useState([]);
     const [bookingsLoading, setBookingsLoading] = useState(true);
+    const [uploadProgress, setUploadProgress] = useState(0);
+
+    const API_BASE_URL = process.env.NODE_ENV === 'production' 
+        ? '' 
+        : 'http://localhost:5000';
 
     useEffect(() => {
         if (user) {
@@ -29,7 +34,7 @@ const Profile = () => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            const { data } = await axios.get('http://localhost:5000/api/bookings', config);
+            const { data } = await axios.get(`${API_BASE_URL}/api/bookings`, config);
             setBookings(data);
             setBookingsLoading(false);
         } catch (error) {
@@ -50,14 +55,12 @@ const Profile = () => {
             };
 
             const { data } = await axios.put(
-                'http://localhost:5000/api/profile',
+                `${API_BASE_URL}/api/profile`,
                 { name, email, password: password || undefined },
                 config
             );
 
-            // Update the user state with the updated profile information
             updateUser(data);
-
             setMessage('Profile updated successfully');
             setPassword('');
         } catch (error) {
@@ -79,6 +82,12 @@ const Profile = () => {
             return;
         }
 
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            setMessage('File size must be less than 5MB');
+            return;
+        }
+
         const formData = new FormData();
         formData.append('profilePicture', file);
 
@@ -93,23 +102,28 @@ const Profile = () => {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${token}`
+                },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(percentCompleted);
                 }
             };
 
             const { data } = await axios.post(
-                'http://localhost:5000/api/profile/upload',
+                `${API_BASE_URL}/api/profile/upload`,
                 formData,
                 config
             );
 
-            // Update the user state with the new profile picture
             updateUser({ profilePicture: data.profilePicture });
             setMessage('Profile picture updated successfully');
+            setUploadProgress(0);
         } catch (error) {
             const errorMessage = error.response?.data?.message || 
                                error.message || 
                                'Error uploading picture';
             setMessage(errorMessage);
+            setUploadProgress(0);
             console.error('Upload error:', error);
         }
     };
@@ -123,15 +137,17 @@ const Profile = () => {
                 }
             };
 
-            await axios.delete('http://localhost:5000/api/profile/picture', config);
-
-            // Update the user state with the removed profile picture
+            await axios.delete(`${API_BASE_URL}/api/profile/picture`, config);
             updateUser({ profilePicture: null });
-
             setMessage('Profile picture removed successfully');
         } catch (error) {
             setMessage(error.response?.data?.message || 'Error removing picture');
         }
+    };
+
+    const getProfilePictureUrl = (profilePicture) => {
+        if (!profilePicture) return defaultAvatar;
+        return `${API_BASE_URL}${profilePicture}`;
     };
 
     if (!isAuthenticated) {
@@ -146,12 +162,7 @@ const Profile = () => {
             <div className="profile-picture-section">
                 <div className="profile-picture">
                     <img 
-                        src={user?.profilePicture 
-                            ? `${process.env.NODE_ENV === 'production' 
-                                ? '' 
-                                : 'http://localhost:5000'}${user.profilePicture}` 
-                            : defaultAvatar
-                        } 
+                        src={getProfilePictureUrl(user?.profilePicture)}
                         alt="Profile" 
                         onError={(e) => {
                             console.log('Image load error:', e);
@@ -163,17 +174,24 @@ const Profile = () => {
                 <div className="profile-picture-actions">
                     <input
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg,image/jpg,image/png"
                         onChange={handlePictureUpload}
                         className="file-input"
                     />
-                    <button 
-                        type="button" 
-                        onClick={handleDeletePicture}
-                        className="delete-btn"
-                    >
-                        Delete Picture
-                    </button>
+                    {uploadProgress > 0 && uploadProgress < 100 && (
+                        <div className="upload-progress">
+                            Uploading: {uploadProgress}%
+                        </div>
+                    )}
+                    {user?.profilePicture && (
+                        <button 
+                            type="button" 
+                            onClick={handleDeletePicture}
+                            className="delete-btn"
+                        >
+                            Delete Picture
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -220,30 +238,12 @@ const Profile = () => {
                     <div className="bookings-list">
                         {bookings.map((booking) => (
                             <div key={booking._id} className="booking-card">
-                                <div className="booking-header">
-                                    <h4>Flight {booking.flight.flightNumber}</h4>
-                                    <span className={`status ${booking.status}`}>{booking.status}</span>
-                                </div>
-                                <div className="booking-details">
-                                    <div>
-                                        <strong>From:</strong> {booking.flight.departureAirport}
-                                    </div>
-                                    <div>
-                                        <strong>To:</strong> {booking.flight.arrivalAirport}
-                                    </div>
-                                    <div>
-                                        <strong>Date:</strong> {new Date(booking.flight.departureTime).toLocaleString()}
-                                    </div>
-                                    <div>
-                                        <strong>Class:</strong> {booking.cabinClass}
-                                    </div>
-                                    <div>
-                                        <strong>Passengers:</strong> {booking.passengers.adults + booking.passengers.children}
-                                    </div>
-                                    <div className="booking-price">
-                                        <strong>Total Price:</strong> ${booking.totalPrice}
-                                    </div>
-                                </div>
+                                <h4>Booking ID: {booking._id}</h4>
+                                <p>Flight: {booking.flight?.flightNumber || 'N/A'}</p>
+                                <p>From: {booking.flight?.origin || 'N/A'}</p>
+                                <p>To: {booking.flight?.destination || 'N/A'}</p>
+                                <p>Date: {new Date(booking.flight?.departureDate).toLocaleDateString() || 'N/A'}</p>
+                                <p>Status: {booking.status}</p>
                             </div>
                         ))}
                     </div>

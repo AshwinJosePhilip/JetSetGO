@@ -27,6 +27,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
 }
 
 .profile-picture img {
@@ -38,31 +39,58 @@
 
 .profile-picture-actions {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 1rem;
-    margin-top: 1rem;
-}
-
-.delete-btn {
-    background-color: transparent;
-    color: #FF8000;
-    padding: 0.5rem 1rem;
-    border: 1px solid #FF8000;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.delete-btn:hover {
-    background-color: rgba(255, 128, 0, 0.1);
+    width: 100%;
+    max-width: 300px;
 }
 
 .file-input {
-    color: #FF8000;
-    background-color: transparent;
-    border: 1px solid #FF8000;
+    width: 100%;
     padding: 0.5rem;
-    border-radius: 5px;
+    border: 1px solid #FF8000;
+    border-radius: 4px;
+    background-color: #2a2a2a;
+    color: #FF8000;
     cursor: pointer;
+}
+
+.file-input::-webkit-file-upload-button {
+    background-color: #FF8000;
+    color: #1a1a1a;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 1rem;
+}
+
+.upload-progress {
+    width: 100%;
+    text-align: center;
+    color: #FF8000;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background-color: #2a2a2a;
+    border-radius: 4px;
+}
+
+.delete-btn {
+    width: 100%;
+    padding: 0.5rem;
+    background-color: #2a2a2a;
+    color: #FF8000;
+    border: 1px solid #FF8000;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+    background-color: #FF8000;
+    color: #1a1a1a;
 }
 
 .profile-form {
@@ -115,12 +143,11 @@
 }
 
 .message {
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 4px;
-    background-color: rgba(255, 128, 0, 0.1);
-    color: #FF8000;
     text-align: center;
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 4px;
+    background-color: #2a2a2a;
     border: 1px solid #FF8000;
 }
 

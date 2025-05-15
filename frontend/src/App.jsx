@@ -24,42 +24,44 @@ function App() {
         bgcolor: '#000000'
       }}
     >
-      <CssBaseline />
-      <Navbar />
-      <Routes>
-        <Route path="/" element={
-          <Box sx={{ flex: 1 }}>
-            <Header />
-            <FlightSearchForm />
-            <ErrorBoundary>
-              <PopularDestinations />
-            </ErrorBoundary>
-            <Box sx={{ mt: 4 }}>
-              <AboutUs />
+      <Box sx={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <CssBaseline />
+        <Navbar />
+        <Routes>
+          <Route path="/" element={
+            <Box sx={{ flex: 1 }}>
+              <Header />
+              <FlightSearchForm />
+              <ErrorBoundary>
+                <PopularDestinations />
+              </ErrorBoundary>
+              <Box sx={{ mt: 4 }}>
+                <AboutUs />
+              </Box>
             </Box>
-          </Box>
-        } />
-        <Route path="/search" element={
-          isAuthenticated ? <FlightSearchForm /> : <Navigate to="/" />
-        } />
-        <Route 
-          path="/profile" 
-          element={isAuthenticated ? <Profile /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/admin/about"
-          element={isAuthenticated && isAdmin ? <AboutUsAdmin /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/admin/destinations"
-          element={isAuthenticated && isAdmin ? <DestinationAdmin /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/admin/flights"
-          element={isAuthenticated && isAdmin ? <FlightAdmin /> : <Navigate to="/" />}
-        />
-      </Routes>
-      <Footer />
+          } />
+          <Route path="/search" element={
+            isAuthenticated ? <FlightSearchForm /> : <Navigate to="/" />
+          } />
+          <Route 
+            path="/profile" 
+            element={isAuthenticated ? <Profile /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/admin/about"
+            element={isAuthenticated && isAdmin ? <AboutUsAdmin /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/admin/destinations"
+            element={isAuthenticated && isAdmin ? <DestinationAdmin /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/admin/flights"
+            element={isAuthenticated && isAdmin ? <FlightAdmin /> : <Navigate to="/" />}
+          />
+        </Routes>
+        <Footer />
+      </Box>
     </Box>
   );
 }
